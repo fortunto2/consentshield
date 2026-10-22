@@ -85,8 +85,8 @@
   .ledger .who { color:var(--fg) } .ledger .who.u { color:var(--accent) }
   footer { color:var(--muted); font-size:13px; max-width:1280px; margin:6px auto 0 }
   @media (prefers-reduced-motion:no-preference){ .frame canvas { transition:opacity .15s } }
-  .pitch { position:fixed; inset:0; background:radial-gradient(1200px 700px at 30% 0%, #12324a, #07090d 70%); z-index:20; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; cursor:pointer }
-  .pitch.on { display:flex } .slide { display:none; max-width:1050px } .slide.on { display:block }
+  .pitch { color:#e9edf3; position:fixed; inset:0; background:radial-gradient(1200px 700px at 30% 0%, #12324a, #07090d 70%); z-index:20; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; cursor:pointer }
+  .pitch.on { display:flex } .pitch h2 { color:#e9edf3 } .pitch .note { color:#8d97a8 } .slide { display:none; max-width:1050px } .slide.on { display:block }
   .slide h2 { font-size:clamp(34px,5.4vw,68px); margin:0 0 22px; letter-spacing:-.03em; line-height:1.05 } .slide h2 em { color:var(--accent); font-style:normal }
   .slide p, .slide li { font-size:clamp(18px,2.2vw,27px); color:#cfd6e2; line-height:1.45 } .slide ul { text-align:left; display:inline-block; margin:0 }
   .flow { font:clamp(14px,1.6vw,20px)/1.9 var(--mono); color:#cfd6e2; text-align:left; display:inline-block; background:#0f141d; border:1px solid var(--line); border-radius:14px; padding:18px 26px }
