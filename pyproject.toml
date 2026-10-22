@@ -10,6 +10,7 @@ dependencies = [
     "pillow>=11",
     "laya==0.3.4",
     "torch==2.7.0",
+    "mcp>=1.2",
 ]
 
 [dependency-groups]

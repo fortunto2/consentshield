@@ -35,7 +35,8 @@ track *Personal agents and data privacy*.
   reproduction of TypeSafe's Jev) answers a typed question with a probability in ~30 ms on Apple
   silicon. Act alone at ≥ 0.8, otherwise ask, the rule from Vivek Haldar's
   [decision models in agent harnesses](https://vivekhaldar.com/articles/llms-do-too-much-offload-to-decision-models/).
-- **Fail closed.** An "ask" stays blurred until you answer, and the answer becomes policy.
+- **Fail closed.** An "ask" stays blurred until you answer. Your answer decides that line and becomes
+  policy for the purpose; the ledger records it as a human decision.
 
 ## Run (macOS, Apple silicon)
 
@@ -47,6 +48,20 @@ make demo       # same gate from the CLI over fixtures/
 ```
 
 Samples in `fixtures/` are synthetic: every name, number and diagnosis is invented.
+
+## Plug it into a real agent (MCP)
+
+The same gate is an MCP server. The agent calls `screenshot(purpose)` and receives the redacted frame
+plus a list of what was held back and why; the raw pixels never enter its context. Answers you give in
+the web UI apply to the agent's next frame, and both write the same consent ledger.
+
+```bash
+claude mcp add consentshield -- uv run --directory "$PWD" python -m app.mcp_server   # Claude Code
+make mcp                                                                             # or any MCP client over stdio
+```
+
+This repo ships `.mcp.json`, so Claude Code started inside it already has the tool. Claude Desktop takes
+the same command in `claude_desktop_config.json`. Tools: `screenshot(purpose, path=None)` and `consent_policy()`.
 
 ## Measured on the samples (M-series Mac, purpose = assistant)
 
