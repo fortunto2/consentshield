@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ConsentShield</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+<style>
+  :root { --bg:#0d0f14; --card:#161a22; --line:#262c38; --fg:#eef1f6; --muted:#8b93a3; --ok:#34d399; --no:#f87171; --ask:#fbbf24; --accent:#7dd3fc; }
+  * { box-sizing:border-box }
+  body { margin:0; background:radial-gradient(1100px 500px at 20% -10%, #12324a 0%, var(--bg) 60%); color:var(--fg); font:15px/1.45 -apple-system, system-ui, sans-serif; padding:20px 16px 40px }
+  header { max-width:1240px; margin:0 auto 14px; display:flex; flex-wrap:wrap; align-items:end; gap:10px 24px; justify-content:space-between }
+  h1 { margin:0; font-size:30px; letter-spacing:-.02em } h1 span { color:var(--accent) }
+  .tag { color:var(--muted); margin:2px 0 0 } main { max-width:1240px; margin:0 auto; display:grid; gap:14px }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px }
+  .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+  button, .btn { background:#222836; color:var(--fg); border:1px solid var(--line); border-radius:10px; padding:8px 12px; font:inherit; cursor:pointer }
+  button.on { background:var(--accent); color:#06121c; border-color:var(--accent); font-weight:600 }
+  button.primary { background:var(--ok); color:#04130c; font-weight:700; border:0 }
+  .thumbs img { height:54px; border-radius:8px; border:1px solid var(--line); cursor:pointer } .thumbs img:hover { outline:2px solid var(--accent) }
+  .panes { display:grid; grid-template-columns:1fr 1fr; gap:14px } @media (max-width:860px){ .panes{ grid-template-columns:1fr } }
+  .pane h3 { margin:0 0 8px; font-size:14px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em }
+  .pane img { width:100%; border-radius:10px; background:#000; min-height:120px; display:block }
+  .stats { display:flex; gap:16px; flex-wrap:wrap; font-size:14px; color:var(--muted) } .stats b { color:var(--fg); font-size:20px }
+  .d { display:grid; grid-template-columns:76px 120px 52px 1fr; gap:8px; padding:7px 0; border-top:1px solid var(--line); align-items:center; font-size:14px }
+  .chip { border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; text-align:center }
+  .allow { background:#0f3b2c; color:var(--ok) } .redact { background:#3b1414; color:var(--no) } .ask { background:#3b2f0c; color:var(--ask) }
+  .why { color:var(--muted); font-size:12px } .asks button { padding:3px 8px; font-size:12px; margin-left:6px }
+  table { border-collapse:collapse; width:100%; font-size:13px } td, th { padding:6px; border-top:1px solid var(--line); text-align:center } th:first-child, td:first-child { text-align:left }
+  td button { padding:2px 10px; min-width:46px } td button.yes { background:#0f3b2c; color:var(--ok) } td button.no { background:#3b1414; color:var(--no) }
+  .grid2 { display:grid; grid-template-columns:3fr 2fr; gap:14px } @media (max-width:860px){ .grid2{ grid-template-columns:1fr } }
+  .ledger div { font:12px/1.5 ui-monospace, Menlo, monospace; color:var(--muted); border-top:1px solid var(--line); padding:5px 0 }
+  .muted { color:var(--muted) } footer { max-width:1240px; margin:18px auto 0; color:var(--muted); font-size:13px }
+</style>
+<body>
+<header>
+  <div><h1>🛡️ Consent<span>Shield</span></h1>
+    <p class="tag">Your agent watches your screen. Your consent decides what leaves it, checked locally before every frame.</p></div>
+  <div class="row" id="purposes"></div>
+</header>
+<main>
+  <div class="card row">
+    <button class="primary" onclick="share()">🖥️ Share my screen</button>
+    <button onclick="grab()" id="grabBtn" disabled>📸 Send frame to agent</button>
+    <label class="btn">🖼️ Upload<input type="file" accept="image/*" hidden onchange="run(this.files[0])"></label>
+    <span class="muted">or try:</span>
+    <span class="row thumbs" id="thumbs"></span>
+  </div>
+  <div class="panes">
+    <div class="card pane"><h3>Your screen · never leaves this Mac</h3><img id="orig" alt=""></div>
+    <div class="card pane"><h3>What the cloud agent receives</h3><img id="agent" alt=""></div>
+  </div>
+  <div class="card stats" id="stats"><span class="muted">Pick a screen to run the gate.</span></div>
+  <div class="grid2">
+    <div class="card"><h3 style="margin:0 0 6px">Decisions</h3><div id="decisions" class="muted">—</div></div>
+    <div class="card"><h3 style="margin:0 0 6px">Your consent, per purpose</h3><table id="matrix"></table>
+      <p class="why">🔒 Credentials never leave, whatever you click. Unsure regions are held blurred until you answer.</p></div>
+  </div>
+  <div class="card"><h3 style="margin:0 0 6px">Consent ledger <span class="why">(categories and decisions only, the text itself is never stored)</span></h3><div id="ledger" class="ledger"></div></div>
+</main>
+<footer>OCR: Apple Vision on device · decisions: Laya (open reproduction of TypeSafe's Jev), calibrated, local · act alone at confidence ≥ <span id="gate">0.8</span>, otherwise ask you · github.com/fortunto2/consentshield</footer>
+<video id="v" autoplay muted playsinline hidden></video>
+<script>
+const $=id=>document.getElementById(id); let P={}, purpose="assistant", last=null, stream=null;
+const FIX=["chat-personal.png","bank-dashboard.png","agent-inbox.png","env-demo.png"];
+$("thumbs").innerHTML=FIX.map(f=>`<img src="/fixtures/${f}" title="${f}" onclick="fromUrl('/fixtures/${f}')">`).join("");
+async function loadPolicy(){ P=await (await fetch("/policy")).json(); $("gate").textContent=P.gate;
+  $("purposes").innerHTML=Object.keys(P.purposes).map(p=>`<button class="${p===purpose?'on':''}" title="${P.purposes[p]}" onclick="setPurpose('${p}')">${p.replace('_',' ')}</button>`).join("");
+  const ps=Object.keys(P.purposes);
+  $("matrix").innerHTML=`<tr><th></th>${ps.map(p=>`<th>${p.replace('_',' ')}</th>`).join("")}</tr>`+Object.keys(P.categories).map(c=>`<tr><td title="${P.categories[c]}">${c.replace('_',' ')}</td>${ps.map(p=>{const v=P.rules[c]?.[p]; const lock=P.locked.includes(c);
+    return `<td><button class="${v?'yes':'no'}" ${lock?'disabled':''} onclick="toggle('${c}','${p}',${!v})">${lock?'🔒':(v?'yes':'no')}</button></td>`}).join("")}</tr>`).join(""); }
+window.setPurpose=p=>{ purpose=p; loadPolicy(); if(last) run(last); };
+window.toggle=async(c,p,v)=>{ const f=new FormData(); f.append("category",c); f.append("purpose",p); f.append("allowed",v); await fetch("/policy",{method:"POST",body:f}); await loadPolicy(); if(last) run(last); };
+window.fromUrl=async u=>run(await (await fetch(u)).blob());
+async function run(blob){ if(!blob) return; last=blob; $("orig").src=URL.createObjectURL(blob); $("stats").innerHTML='<span class="muted">Gate running locally…</span>';
+  const f=new FormData(); f.append("frame",blob,"frame.png"); f.append("purpose",purpose);
+  const t0=performance.now(); const r=await (await fetch("/gate",{method:"POST",body:f})).json(); const ms=Math.round(performance.now()-t0);
+  $("agent").src=r.agent_sees; const c=r.counts, n=r.decisions.length;
+  $("stats").innerHTML=`<span><b>${n}</b> text regions</span><span><b style="color:var(--ok)">${c.allow}</b> sent</span><span><b style="color:var(--no)">${c.redact}</b> blurred</span><span><b style="color:var(--ask)">${c.ask}</b> waiting for you</span><span><b>${ms}</b> ms on this Mac</span><span><b>0</b> bytes sent before the decision</span>`;
+  $("decisions").innerHTML=r.decisions.map(d=>`<div class="d"><span class="chip ${d.action}">${d.action}</span><span>${d.category.replace('_',' ')}</span><span>${d.confidence.toFixed(2)}</span><span>${esc(d.text).slice(0,90)}<br><span class="why">${d.source}: ${esc(d.reason)}</span>${d.action==='ask'&&!P.locked.includes(d.category)&&P.categories[d.category]?`<span class="asks"><button onclick="toggle('${d.category}','${purpose}',true)">allow ${d.category.replace('_',' ')}</button><button onclick="toggle('${d.category}','${purpose}',false)">keep private</button></span>`:''}</span></div>`).join("");
+  loadLedger(); }
+function esc(s){ return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]); }
+async function loadLedger(){ const rows=await (await fetch("/ledger")).json();
+  $("ledger").innerHTML=rows.slice(0,12).map(e=>`<div>${e.ts.slice(11,19)} · frame ${e.frame} · purpose=${e.purpose} · sent ${e.counts.allow} · blurred ${e.counts.redact} · asked ${e.counts.ask} · ${e.ms} ms · ${[...new Set(e.decisions.filter(d=>d.action!=='allow').map(d=>d.category))].join(', ')||'nothing sensitive'}</div>`).join("")||'<div>empty</div>'; }
+window.share=async()=>{ try{ stream=await navigator.mediaDevices.getDisplayMedia({video:true}); $("v").srcObject=stream; $("grabBtn").disabled=false; setTimeout(grab,700); }catch(e){ alert(e.message); } };
+window.grab=()=>{ const v=$("v"), c=document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext("2d").drawImage(v,0,0); c.toBlob(run,"image/png"); };
+loadPolicy(); loadLedger();
+</script>
+</body>
+</html>
