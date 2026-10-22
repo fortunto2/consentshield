@@ -1,0 +1,7 @@
+hook|Your AI agent just took a screenshot. What did it see?
+problem|A biopsy chat. Your mom's number. Your Venmo.
+gate|ConsentShield checks every frame on your Mac first. Health, money and contacts are blurred before the agent gets them.
+purpose|Change the purpose, change the answer. Model training gets nothing.
+ask|When the local model is unsure, it asks you. One click decides, and lands in the consent ledger.
+inject|Prompt injections on screen never reach the agent.
+cta|ConsentShield. Consent at the moment an agent acts. Ships today as an MCP server.

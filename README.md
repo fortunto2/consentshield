@@ -5,6 +5,10 @@
 **Demo:** [fortunto2.github.io/consentshield](https://fortunto2.github.io/consentshield/) (recorded results from the
 real gate, consent matrix live in the page) · the live gate runs on your Mac, see Run below.
 
+**Demo (34 s, with voice):** [docs/consentshield-demo.mp4](docs/consentshield-demo.mp4)
+
+![ConsentShield demo](docs/consentshield-demo.gif)
+
 ![ConsentShield: your screen on the left, what the cloud agent receives on the right](docs/demo.png)
 
 Personal agents now see the screen: computer-use agents, "remember everything" assistants, Claude

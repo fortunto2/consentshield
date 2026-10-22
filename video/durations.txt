@@ -1,0 +1,7 @@
+hook 3.185986
+problem 3.027619
+gate 6.340227
+purpose 3.806304
+ask 5.656644
+inject 2.599773
+cta 5.144399
