@@ -63,6 +63,10 @@ make mcp                                                                        
 This repo ships `.mcp.json`, so Claude Code started inside it already has the tool. Claude Desktop takes
 the same command in `claude_desktop_config.json`. Tools: `screenshot(purpose, path=None)` and `consent_policy()`.
 
+Tried for real: Claude Code called the tool on the personal-chat sample and reported *"I can read only one
+line: the sprint planning doc. The other 6 regions are blurred. No raw personal data reached me."*
+Full transcript in [docs/mcp-transcript.md](docs/mcp-transcript.md).
+
 ## Measured on the samples (M-series Mac, purpose = assistant)
 
 | Screen | regions | sent | blurred | asked | time |
