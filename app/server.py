@@ -50,9 +50,10 @@ def set_policy(category: str = Form(...), purpose: str = Form(...), allowed: boo
 
 
 @app.post("/gate")
-async def gate(frame: UploadFile = File(...), purpose: str = Form("assistant")):
+async def gate(frame: UploadFile = File(...), purpose: str = Form("assistant"), decisions: str = Form("{}")):
+    """`decisions` is JSON {line text: "allow"|"redact"}: what the human already answered for this purpose."""
     raw = await frame.read()
-    res = decide(ocr(raw), purpose, policy, judge)
+    res = decide(ocr(raw), purpose, policy, judge, user=json.loads(decisions))
     entry = ledger(DATA / "ledger.jsonl", res, hashlib.sha1(raw).hexdigest()[:10])
     return {**res.to_dict(), "ledger": entry,
             "agent_sees": "data:image/png;base64," + base64.b64encode(redact(raw, res)).decode()}

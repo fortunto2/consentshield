@@ -10,13 +10,13 @@ Order matters and is deliberate:
 from __future__ import annotations
 
 import io
+import json
 import os
 import re
-import json
 import subprocess
 import tempfile
 import time
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
@@ -26,6 +26,7 @@ from .policy import Policy
 from .schemas import GATE, Decision, GateResult, Region
 
 MONEY = re.compile(r"[$€£]\s?\d[\d,]*(\.\d{2})?")  # an amount on screen is about someone's money, whatever the model says
+CONN = re.compile(r"\w+://[^\s/@]+:\s?[^\s/@]+@")  # user:password@host; OCR often breaks it so the url rule misses and "email" fires
 CONTEXT = os.environ.get("GATE_CONTEXT", "0") == "1"  # measured worse on fixtures 22.10 (biopsy line -> ask, address -> allow); judge a line together with the screen title and its neighbours
 RULE_CATEGORY = {"email": "contact_info", "phone": "contact_info", "us-ssn": "contact_info",
                  "credit-card": "financial"}
@@ -42,16 +43,21 @@ def ocr(image: bytes) -> list[Region]:
             for t in d.get("texts", []) if t["text"].strip()]
 
 
-def decide(regions: list[Region], purpose: str, policy: Policy, judge) -> GateResult:
+def decide(regions: list[Region], purpose: str, policy: Policy, judge, user: dict[str, str] | None = None) -> GateResult:
+    """`user` maps a line's text to the action the human already chose for it under this purpose."""
     t0 = time.perf_counter()
     res = GateResult(purpose)
+    user = user or {}
     for i, r in enumerate(regions):
         hits = detect_leaks(r.text) + detect_injection(r.text)
         if hits:
             h = max(hits, key=lambda f: f.severity == "critical")
             cat = "injection" if h.kind == "injection" else RULE_CATEGORY.get(h.rule, "credentials")
+            why = f"{h.rule}: {h.reason}"
+            if cat == "contact_info" and CONN.search(r.text):
+                cat, why = "credentials", "password inside a connection string"
             if cat == "injection" or not policy.allows(cat, purpose):
-                res.decisions.append(Decision(r.text, r.box, cat, 1.0, "redact", f"{h.rule}: {h.reason}", "detector"))
+                res.decisions.append(Decision(r.text, r.box, cat, 1.0, "redact", why, "detector"))
                 continue
         if MONEY.search(r.text):
             act = "allow" if policy.allows("financial", purpose) else "redact"
@@ -63,6 +69,9 @@ def decide(regions: list[Region], purpose: str, policy: Policy, judge) -> GateRe
         near = [regions[0].text] + [x.text for x in regions[max(1, i - 1):i + 2] if x is not r]
         cat, conf, ms = judge.classify(r.text, " | ".join(dict.fromkeys(near)) if CONTEXT else "")
         allowed = policy.allows(cat, purpose)
+        if user.get(r.text) in ("allow", "redact"):
+            res.decisions.append(Decision(r.text, r.box, cat, round(conf, 3), user[r.text], f"you decided for {purpose}", "user", round(ms, 1)))
+            continue
         if conf < GATE:
             action, why = "ask", f"model unsure ({conf:.2f} < {GATE}), held until you decide"
         elif allowed:
@@ -92,7 +101,7 @@ def redact(image: bytes, res: GateResult) -> bytes:
 
 def ledger(path: Path, res: GateResult, frame: str) -> dict:
     """Consent record: what was decided, by whom, under which purpose. Text itself is not stored."""
-    entry = {"ts": datetime.now(timezone.utc).isoformat(timespec="seconds"), "frame": frame,
+    entry = {"ts": datetime.now(UTC).isoformat(timespec="seconds"), "frame": frame,
              "purpose": res.purpose, "counts": res.counts, "ms": round(res.ms),
              "decisions": [{"category": d.category, "action": d.action, "confidence": d.confidence,
                             "source": d.source} for d in res.decisions if d.category != "public"]}

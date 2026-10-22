@@ -77,7 +77,7 @@
 <div class="dots" id="dots"></div></div>
 <video id="v" autoplay muted playsinline hidden></video>
 <script>
-const $=id=>document.getElementById(id); let P={}, purpose="assistant", last=null, stream=null;
+const $=id=>document.getElementById(id); let P={}, purpose="assistant", last=null, stream=null, U={}, R=null; // U[purpose][line text] = what you answered
 const FIX=["chat-personal.png","bank-dashboard.png","agent-inbox.png","env-demo.png"];
 $("thumbs").innerHTML=FIX.map(f=>`<img src="/fixtures/${f}" title="${f}" onclick="fromUrl('/fixtures/${f}')">`).join("");
 async function loadPolicy(){ P=await (await fetch("/policy")).json(); $("gate").textContent=P.gate;
@@ -87,13 +87,14 @@ async function loadPolicy(){ P=await (await fetch("/policy")).json(); $("gate").
     return `<td><button class="${v?'yes':'no'}" ${lock?'disabled':''} onclick="toggle('${c}','${p}',${!v})">${lock?'🔒':(v?'yes':'no')}</button></td>`}).join("")}</tr>`).join(""); }
 window.setPurpose=p=>{ purpose=p; loadPolicy(); if(last) run(last); };
 window.toggle=async(c,p,v)=>{ const f=new FormData(); f.append("category",c); f.append("purpose",p); f.append("allowed",v); await fetch("/policy",{method:"POST",body:f}); await loadPolicy(); if(last) run(last); };
+window.answer=(i,act)=>{ const d=R.decisions[i]; (U[purpose]??={})[d.text]=act; toggle(d.category,purpose,act==='allow'); };
 window.fromUrl=async u=>run(await (await fetch(u)).blob());
 async function run(blob){ if(!blob) return; last=blob; $("orig").src=URL.createObjectURL(blob); $("stats").innerHTML='<span class="muted">Gate running locally…</span>';
-  const f=new FormData(); f.append("frame",blob,"frame.png"); f.append("purpose",purpose);
+  const f=new FormData(); f.append("frame",blob,"frame.png"); f.append("purpose",purpose); f.append("decisions",JSON.stringify(U[purpose]||{}));
   const t0=performance.now(); const r=await (await fetch("/gate",{method:"POST",body:f})).json(); const ms=Math.round(performance.now()-t0);
   $("agent").src=r.agent_sees; const c=r.counts, n=r.decisions.length;
   $("stats").innerHTML=`<span><b>${n}</b> text regions</span><span><b style="color:var(--ok)">${c.allow}</b> sent</span><span><b style="color:var(--no)">${c.redact}</b> blurred</span><span><b style="color:var(--ask)">${c.ask}</b> waiting for you</span><span><b>${ms}</b> ms on this Mac</span><span><b>0</b> bytes sent before the decision</span>`;
-  $("decisions").innerHTML=r.decisions.map(d=>`<div class="d"><span class="chip ${d.action}">${d.action}</span><span>${d.category.replace('_',' ')}</span><span>${d.confidence.toFixed(2)}</span><span>${esc(d.text).slice(0,90)}<br><span class="why">${d.source}: ${esc(d.reason)}</span>${d.action==='ask'&&!P.locked.includes(d.category)&&P.categories[d.category]?`<span class="asks"><button onclick="toggle('${d.category}','${purpose}',true)">allow ${d.category.replace('_',' ')}</button><button onclick="toggle('${d.category}','${purpose}',false)">keep private</button></span>`:''}</span></div>`).join("");
+  R=r; $("decisions").innerHTML=r.decisions.map((d,i)=>`<div class="d"><span class="chip ${d.action}">${d.action}</span><span>${d.category.replace('_',' ')}</span><span>${d.confidence.toFixed(2)}</span><span>${esc(d.text).slice(0,90)}<br><span class="why">${d.source}: ${esc(d.reason)}</span>${d.action==='ask'&&!P.locked.includes(d.category)&&P.categories[d.category]?`<span class="asks"><button onclick="answer(${i},'allow')">allow ${d.category.replace('_',' ')}</button><button onclick="answer(${i},'redact')">keep private</button></span>`:''}</span></div>`).join("");
   loadLedger(); }
 function esc(s){ return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]); }
 async function loadLedger(){ const rows=await (await fetch("/ledger")).json();

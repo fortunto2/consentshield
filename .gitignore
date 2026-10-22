@@ -4,3 +4,4 @@ data/
 .env
 .DS_Store
 data-server.log
+.playwright-mcp/
