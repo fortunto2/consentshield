@@ -7,6 +7,9 @@ reset: ## before going on stage: stop the server, forget every consent and ledge
 	$(MAKE) run
 run: ## web demo on :8790
 	uv run uvicorn app.server:app --host 0.0.0.0 --port 8790
+install-mcp: ## register the MCP server in Claude Code for every directory (user scope)
+	claude mcp add consentshield -s user -- uv run --directory "$(CURDIR)" python -m app.mcp_server
+	@echo "done: 'claude mcp list' should show consentshield. Grant Screen Recording to the app that runs Claude."
 mcp: ## MCP server over stdio (what `claude mcp add` / Claude Desktop launch)
 	uv run python -m app.mcp_server
 fixtures: ## regenerate the synthetic personal screens

@@ -16,4 +16,4 @@ Fixtures are synthetic; never add real personal screenshots.
 
 ## Next session
 Start with `docs/CONTEXT.md` and `docs/ROADMAP.md`. Deadline today 17:00 PT. The web demo may already be running on :8790
-(`lsof -i :8790`). Skill: `.claude/skills/dev/SKILL.md`.
+(`lsof -i :8790`). Skills: `.claude/skills/dev/SKILL.md` (extend the gate), `.claude/skills/consentshield/SKILL.md` (install and use over MCP).

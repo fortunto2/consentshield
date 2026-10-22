@@ -63,7 +63,8 @@ claude mcp add consentshield -- uv run --directory "$PWD" python -m app.mcp_serv
 make mcp                                                                             # or any MCP client over stdio
 ```
 
-This repo ships `.mcp.json`, so Claude Code started inside it already has the tool. Claude Desktop takes
+`make install-mcp` registers it for every directory (user scope). This repo also ships `.mcp.json`, so Claude Code started inside it already has the tool.
+Full setup, Screen Recording permission, tool contract and troubleshooting: [.claude/skills/consentshield/SKILL.md](.claude/skills/consentshield/SKILL.md). Claude Desktop takes
 the same command in `claude_desktop_config.json`. Tools: `screenshot(purpose, path=None)` and `consent_policy()`.
 
 Tried for real: Claude Code called the tool on the personal-chat sample and reported *"I can read only one
