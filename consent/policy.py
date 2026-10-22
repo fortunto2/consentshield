@@ -14,7 +14,7 @@ DEFAULT: dict[str, dict[str, bool]] = {
     "financial": {"assistant": False, "analytics": False, "training": False, "third_party": False},
     "health": {"assistant": False, "analytics": False, "training": False, "third_party": False},
     "private_message": {"assistant": False, "analytics": False, "training": False, "third_party": False},
-    "contact_info": {"assistant": True, "analytics": False, "training": False, "third_party": False},
+    "contact_info": {"assistant": False, "analytics": False, "training": False, "third_party": False},
     "work": {"assistant": True, "analytics": True, "training": False, "third_party": True},
     "public": {p: True for p in PURPOSES},
 }
