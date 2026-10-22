@@ -4,109 +4,155 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ConsentShield</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-  :root { --bg:#0d0f14; --card:#161a22; --line:#262c38; --fg:#eef1f6; --muted:#8b93a3; --ok:#34d399; --no:#f87171; --ask:#fbbf24; --accent:#7dd3fc; }
+  :root { --bg:#0c0f14; --panel:#141924; --panel-2:#1b2130; --line:#28303f; --fg:#e9edf3; --muted:#8d97a8; --faint:#5e6878;
+    --accent:#6fc3ff; --accent-ink:#06121c; --ok:#3ad598; --ok-bg:#0f3327; --no:#ff6b6b; --no-bg:#3a1618; --ask:#f5b73d; --ask-bg:#3a2d0e; --screen:#f6f7f9;
+    --sans:"IBM Plex Sans", -apple-system, system-ui, sans-serif; --mono:"IBM Plex Mono", ui-monospace, Menlo, monospace; color-scheme:dark }
   * { box-sizing:border-box }
-  body { margin:0; background:radial-gradient(1100px 500px at 20% -10%, #12324a 0%, var(--bg) 60%); color:var(--fg); font:15px/1.45 -apple-system, system-ui, sans-serif; padding:20px 16px 40px }
-  header { max-width:1240px; margin:0 auto 14px; display:flex; flex-wrap:wrap; align-items:end; gap:10px 24px; justify-content:space-between }
-  h1 { margin:0; font-size:30px; letter-spacing:-.02em } h1 span { color:var(--accent) }
-  .tag { color:var(--muted); margin:2px 0 0 } main { max-width:1240px; margin:0 auto; display:grid; gap:14px }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:16px; padding:14px }
+  body { margin:0; background:radial-gradient(1100px 500px at 20% -10%, #12324a 0%, var(--bg) 60%); color:var(--fg); font:15px/1.45 var(--sans); padding:18px 16px 44px }
+  .wrap { max-width:1280px; margin:0 auto; display:grid; gap:14px }
+  header { display:flex; flex-wrap:wrap; gap:8px 24px; align-items:flex-end; justify-content:space-between }
+  h1 { margin:0; font-size:28px; letter-spacing:-.02em; font-weight:700 } h1 span { color:var(--accent) }
+  .tag { margin:2px 0 0; color:var(--muted); max-width:62ch }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:14px; padding:14px; min-width:0 }
   .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center }
-  button, .btn { background:#222836; color:var(--fg); border:1px solid var(--line); border-radius:10px; padding:8px 12px; font:inherit; cursor:pointer }
-  button.on { background:var(--accent); color:#06121c; border-color:var(--accent); font-weight:600 }
-  button.primary { background:var(--ok); color:#04130c; font-weight:700; border:0 }
-  .thumbs img { height:54px; border-radius:8px; border:1px solid var(--line); cursor:pointer } .thumbs img:hover { outline:2px solid var(--accent) }
-  .panes { display:grid; grid-template-columns:1fr 1fr; gap:14px } @media (max-width:860px){ .panes{ grid-template-columns:1fr } }
-  .pane h3 { margin:0 0 8px; font-size:14px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.06em }
-  .pane img { width:100%; border-radius:10px; background:#000; min-height:120px; display:block }
-  .stats { display:flex; gap:16px; flex-wrap:wrap; font-size:14px; color:var(--muted) } .stats b { color:var(--fg); font-size:20px }
-  .d { display:grid; grid-template-columns:76px 120px 52px 1fr; gap:8px; padding:7px 0; border-top:1px solid var(--line); align-items:center; font-size:14px }
-  .chip { border-radius:999px; padding:2px 8px; font-size:12px; font-weight:700; text-align:center }
-  .allow { background:#0f3b2c; color:var(--ok) } .redact { background:#3b1414; color:var(--no) } .ask { background:#3b2f0c; color:var(--ask) }
-  .why { color:var(--muted); font-size:12px } .asks button { padding:3px 8px; font-size:12px; margin-left:6px }
-  table { border-collapse:collapse; width:100%; font-size:13px } td, th { padding:6px; border-top:1px solid var(--line); text-align:center } th:first-child, td:first-child { text-align:left }
-  td button { padding:2px 10px; min-width:46px } td button.yes { background:#0f3b2c; color:var(--ok) } td button.no { background:#3b1414; color:var(--no) }
-  .grid2 { display:grid; grid-template-columns:3fr 2fr; gap:14px } @media (max-width:860px){ .grid2{ grid-template-columns:1fr } }
-  .ledger div { font:12px/1.5 ui-monospace, Menlo, monospace; color:var(--muted); border-top:1px solid var(--line); padding:5px 0 }
-  .muted { color:var(--muted) } footer { max-width:1240px; margin:18px auto 0; color:var(--muted); font-size:13px }
+  button, .btn { background:var(--panel-2); color:var(--fg); border:1px solid var(--line); border-radius:9px; padding:7px 12px; font:inherit; font-size:14px; cursor:pointer }
+  button:hover { border-color:var(--accent) } button:focus-visible { outline:2px solid var(--accent); outline-offset:2px } button[disabled] { opacity:.5; cursor:not-allowed }
+  button.primary { background:var(--ok); color:#04130c; font-weight:700; border-color:transparent }
+  .samples { display:flex; gap:8px; flex-wrap:wrap } .sample { display:grid; gap:4px; justify-items:center; background:transparent; border:1px solid var(--line); border-radius:10px; padding:5px 6px; font-size:12px; color:var(--muted) }
+  .sample img { height:44px; width:80px; object-fit:cover; object-position:top; border-radius:6px; display:block } .sample.on { border-color:var(--accent); color:var(--fg) }
+  .panes { display:grid; grid-template-columns:1fr 1fr; gap:14px; align-items:start } @media (max-width:900px){ .panes { grid-template-columns:1fr } }
+  .pane-h { display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px; min-height:32px }
+  .pane-h h3 { margin:0; font-size:12px; color:var(--muted); font-weight:600; text-transform:uppercase; letter-spacing:.08em }
+  .tabs { display:flex; gap:4px; background:var(--panel-2); border:1px solid var(--line); border-radius:10px; padding:3px }
+  .tabs button { border:0; background:transparent; padding:5px 10px; border-radius:7px; color:var(--muted) } .tabs button.on { background:var(--accent); color:var(--accent-ink); font-weight:600 }
+  .frame { position:relative; background:var(--screen); border-radius:10px; overflow:hidden; min-height:120px }
+  .frame img { width:100%; display:block; height:auto }
+  .frame .hl { position:absolute; border:2px solid var(--accent); border-radius:4px; box-shadow:0 0 0 3px rgba(111,195,255,.3); pointer-events:none; display:none } .frame .hl.on { display:block }
+  .stats { display:flex; gap:18px; flex-wrap:wrap; margin-top:10px; font-size:13px; color:var(--muted); font-variant-numeric:tabular-nums }
+  .stats b { color:var(--fg); font-size:20px; font-weight:600; margin-right:4px } .stats .ok b { color:var(--ok) } .stats .no b { color:var(--no) } .stats .ask b { color:var(--ask) }
+  .grid2 { display:grid; grid-template-columns:minmax(0,3fr) minmax(0,2fr); gap:14px } @media (max-width:900px){ .grid2 { grid-template-columns:1fr } }
+  .col { display:grid; gap:14px; align-content:start; min-width:0 }
+  .card h3.t { margin:0 0 8px; font-size:15px; font-weight:600 } .card h3.t small { color:var(--muted); font-weight:400; font-size:13px; margin-left:6px }
+  .queue { border-color:var(--ask); background:linear-gradient(0deg, rgba(245,183,61,.07), var(--panel)) }
+  .q { display:grid; grid-template-columns:1fr auto; gap:8px 12px; align-items:center; padding:9px 0; border-top:1px solid var(--line) }
+  .q .meta { color:var(--muted); font-size:12px; margin-top:2px } .q .act { display:flex; gap:6px; flex-wrap:wrap } .q .act button { padding:5px 10px; font-size:13px }
+  .q .act .yes { color:var(--ok); border-color:rgba(58,213,152,.45) } .q .act .keep { color:var(--no); border-color:rgba(255,107,107,.45) }
+  @media (max-width:560px){ .q { grid-template-columns:1fr } }
+  .d { display:grid; grid-template-columns:64px 112px 64px minmax(0,1fr); gap:10px; padding:8px 6px; border-top:1px solid var(--line); align-items:start; font-size:14px; border-radius:6px; margin:0 -6px }
+  .d:hover, .q:hover { background:var(--panel-2) } .d.user .chip::after { content:" · you"; font-weight:500 }
+  @media (max-width:560px){ .d { grid-template-columns:64px 1fr } .d .cat, .d .conf { display:none } }
+  .chip { border-radius:999px; padding:2px 8px; font-size:12px; font-weight:600; text-align:center; align-self:center }
+  .allow { background:var(--ok-bg); color:var(--ok) } .redact { background:var(--no-bg); color:var(--no) } .ask { background:var(--ask-bg); color:var(--ask) }
+  .cat { color:var(--muted) } .conf { font-variant-numeric:tabular-nums; color:var(--muted); font-size:13px; display:grid; gap:3px }
+  .conf i { display:block; height:3px; background:var(--line); border-radius:2px; overflow:hidden } .conf i b { display:block; height:100%; background:var(--accent) } .conf.low i b { background:var(--ask) }
+  .why { color:var(--muted); font-size:12px }
+  table { border-collapse:collapse; width:100%; font-size:13px } td, th { padding:5px 4px; border-top:1px solid var(--line); text-align:center }
+  th { color:var(--muted); font-weight:500; font-size:12px; border:0 } th:first-child, td:first-child { text-align:left }
+  td button { padding:2px 0; min-width:44px; font-size:12px; border-radius:7px } td button.yes { background:var(--ok-bg); color:var(--ok); border-color:transparent } td button.no { background:var(--no-bg); color:var(--no); border-color:transparent }
+  td button.lock { background:transparent; color:var(--faint); border-color:transparent; cursor:not-allowed }
+  .note { color:var(--muted); font-size:12px; margin:8px 0 0 }
+  .ledger { font:12px/1.55 var(--mono); color:var(--muted) } .ledger div { border-top:1px solid var(--line); padding:5px 0 } .ledger .u { color:var(--accent) }
+  footer { color:var(--muted); font-size:13px; max-width:1280px; margin:6px auto 0 }
   .pitch { position:fixed; inset:0; background:radial-gradient(1200px 700px at 30% 0%, #12324a, #07090d 70%); z-index:20; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; cursor:pointer }
   .pitch.on { display:flex } .slide { display:none; max-width:1050px } .slide.on { display:block }
   .slide h2 { font-size:clamp(34px,5.4vw,68px); margin:0 0 22px; letter-spacing:-.03em; line-height:1.05 } .slide h2 em { color:var(--accent); font-style:normal }
   .slide p, .slide li { font-size:clamp(18px,2.2vw,27px); color:#cfd6e2; line-height:1.45 } .slide ul { text-align:left; display:inline-block; margin:0 }
-  .flow { font:clamp(14px,1.6vw,20px)/1.9 ui-monospace,Menlo,monospace; color:#cfd6e2; text-align:left; display:inline-block; background:#0f141d; border:1px solid var(--line); border-radius:14px; padding:18px 26px }
+  .flow { font:clamp(14px,1.6vw,20px)/1.9 var(--mono); color:#cfd6e2; text-align:left; display:inline-block; background:#0f141d; border:1px solid var(--line); border-radius:14px; padding:18px 26px }
   .dots { position:fixed; bottom:22px; display:flex; gap:8px } .dots i { width:9px; height:9px; border-radius:50%; background:#334 } .dots i.on { background:var(--accent) }
   .x { position:fixed; top:16px; right:22px; color:var(--muted); font-size:14px }
 </style>
 <body>
+<div class="wrap">
 <header>
   <div><h1>🛡️ Consent<span>Shield</span></h1>
-    <p class="tag">Your agent watches your screen. Your consent decides what leaves it, checked locally before every frame.</p></div>
-  <div class="row"><span class="row" id="purposes"></span><button onclick="pitch(0)">🎤 Pitch</button></div>
+    <p class="tag">Your agent watches your screen. Your consent decides what leaves it, checked on this Mac before every frame.</p></div>
+  <div class="row"><button onclick="pitch(0)">🎤 Pitch</button></div>
 </header>
-<main>
-  <div class="card row">
-    <button class="primary" onclick="share()">🖥️ Share my screen</button>
-    <button onclick="grab()" id="grabBtn" disabled>📸 Send frame to agent</button>
-    <label class="btn">🖼️ Upload<input type="file" accept="image/*" hidden onchange="run(this.files[0])"></label>
-    <span class="muted">or try:</span>
-    <span class="row thumbs" id="thumbs"></span>
+<div class="card row">
+  <button class="primary" onclick="share()">🖥️ Share my screen</button>
+  <button onclick="grab()" id="grabBtn" disabled>📸 Send frame to agent</button>
+  <label class="btn">🖼️ Upload<input type="file" accept="image/*" hidden onchange="run(this.files[0])"></label>
+  <span class="note" style="margin:0 4px 0 6px">Samples (all synthetic):</span>
+  <span class="samples" id="samples"></span>
+</div>
+<div class="panes">
+  <div class="card"><div class="pane-h"><h3>Your screen · never leaves this Mac</h3><span class="note" style="margin:0" id="dims"></span></div>
+    <div class="frame"><img id="orig" alt=""><div class="hl" id="hl0"></div></div></div>
+  <div class="card"><div class="pane-h"><h3>What the agent receives</h3><div class="tabs" id="purposes" role="tablist" aria-label="Agent purpose"></div></div>
+    <div class="frame"><img id="agent" alt=""><div class="hl" id="hl1"></div></div>
+    <div class="stats" id="stats"><span class="note" style="margin:0">Pick a screen to run the gate.</span></div></div>
+</div>
+<div class="grid2">
+  <div class="col">
+    <div class="card queue" id="queue" hidden>
+      <h3 class="t">Waiting for you <small id="qn"></small></h3>
+      <p class="note" style="margin:0 0 4px">The model was not sure what these lines are. They stay blurred until you answer. Your answer decides the line and becomes policy for this purpose.</p>
+      <div id="qlist"></div></div>
+    <div class="card"><h3 class="t">Every line, every decision <small>hover a row to find it on the screen</small></h3><div id="decisions" class="note">—</div></div>
   </div>
-  <div class="panes">
-    <div class="card pane"><h3>Your screen · never leaves this Mac</h3><img id="orig" alt=""></div>
-    <div class="card pane"><h3>What the cloud agent receives</h3><img id="agent" alt=""></div>
+  <div class="col">
+    <div class="card"><h3 class="t">Your consent, per purpose</h3><div style="overflow-x:auto"><table id="matrix"></table></div>
+      <p class="note">🔒 Credentials never leave, whatever you click. Detectors (keys, cards, amounts, injection) run before the model and cannot be overruled.</p></div>
+    <div class="card"><h3 class="t">Consent ledger <small>categories and outcomes only, never the text</small></h3><div id="ledger" class="ledger"></div></div>
   </div>
-  <div class="card stats" id="stats"><span class="muted">Pick a screen to run the gate.</span></div>
-  <div class="grid2">
-    <div class="card"><h3 style="margin:0 0 6px">Decisions</h3><div id="decisions" class="muted">—</div></div>
-    <div class="card"><h3 style="margin:0 0 6px">Your consent, per purpose</h3><table id="matrix"></table>
-      <p class="why">🔒 Credentials never leave, whatever you click. Unsure regions are held blurred until you answer.</p></div>
-  </div>
-  <div class="card"><h3 style="margin:0 0 6px">Consent ledger <span class="why">(categories and decisions only, the text itself is never stored)</span></h3><div id="ledger" class="ledger"></div></div>
-</main>
-<footer>OCR: Apple Vision on device · decisions: Laya (open reproduction of TypeSafe's Jev), calibrated, local · act alone at confidence ≥ <span id="gate">0.8</span>, otherwise ask you · github.com/fortunto2/consentshield</footer>
+</div>
+</div>
+<footer>OCR: Apple Vision on device · decisions: Laya (open reproduction of TypeSafe's Jev), calibrated, local · acts alone at confidence ≥ <span id="gate">0.8</span>, otherwise asks you · MCP server for any agent · github.com/fortunto2/consentshield</footer>
 <div class="pitch" id="pitch" onclick="next()"><span class="x">← → or click · Esc to close</span>
 <div class="slide"><h2>Your agent watches your screen.<br><em>Who decides what it sends?</em></h2>
 <p>Computer-use agents, recall assistants, Claude over MCP: every screenshot goes to the cloud<br>with whatever was open. A biopsy chat. A bank balance. An <code>.env</code>.</p>
-<p class="muted">Consent today is a cookie banner. Nothing asks at the moment an agent takes your data.</p></div>
+<p class="note" style="font-size:inherit">Consent today is a cookie banner. Nothing asks at the moment an agent takes your data.</p></div>
 <div class="slide"><h2>Consent<em>Shield</em></h2><p>A consent gate between the screen and the agent, on the device.</p>
 <div class="flow">frame → OCR on device (Apple Vision)<br>&nbsp;&nbsp;→ detectors first: secrets · cards · money · injection<br>&nbsp;&nbsp;→ local decision model (Laya, open Jev): category + confidence<br>&nbsp;&nbsp;→ your consent per purpose: assistant · analytics · training · 3rd party<br>&nbsp;&nbsp;→ ≥ 0.8: act alone &nbsp;·&nbsp; below: blur and ask you<br>&nbsp;&nbsp;→ agent gets the redacted frame · ledger records the decision</div></div>
 <div class="slide"><h2>Live demo</h2><ul><li>Same screen, <em>assistant</em> vs <em>training</em>: different purpose, different frame</li><li>Model unsure → held blurred; one click decides the line, becomes policy, lands in the ledger as a human decision</li><li>"Ignore previous instructions…" never reaches the agent</li><li>0 bytes leave before the decision · ledger keeps categories, never text</li></ul></div>
 <div class="slide"><h2>Consent at the moment <em>an agent acts</em></h2><ul><li>SDK / sidecar for agent vendors: one call before every screenshot or tool call</li><li>Consent ledger for GDPR, CCPA and the EU AI Act audits</li><li>Purposes are the language privacy platforms already speak, now enforced per frame</li><li>Ships as an MCP server today: <code>claude mcp add consentshield</code>, the agent's <em>screenshot</em> tool returns the gated frame</li><li>Next: Core ML model at 14 ms, signed consent receipts, per-agent identities</li></ul></div>
-<div class="slide"><h2>Rustam Salavatov</h2><p>AI engineer · ScreenShield (3rd place, Cyberdefense Hackathon SF, 9 Oct)</p><img src="/qr.png" alt="" style="width:220px;border-radius:14px;margin-top:10px;background:#fff;padding:10px"><p class="muted">github.com/fortunto2/consentshield</p></div>
+<div class="slide"><h2>Rustam Salavatov</h2><p>AI engineer · ScreenShield (3rd place, Cyberdefense Hackathon SF, 9 Oct)</p><img src="/qr.png" alt="" style="width:220px;border-radius:14px;margin-top:10px;background:#fff;padding:10px"><p class="note" style="font-size:inherit">github.com/fortunto2/consentshield</p></div>
 <div class="dots" id="dots"></div></div>
 <video id="v" autoplay muted playsinline hidden></video>
 <script>
-const $=id=>document.getElementById(id); let P={}, purpose="assistant", last=null, stream=null, U={}, R=null; // U[purpose][line text] = what you answered
+const $=id=>document.getElementById(id); let P={}, purpose="assistant", last=null, lastName="", stream=null, U={}, R=null; // U[purpose][line text] = what you answered
 const FIX=["chat-personal.png","bank-dashboard.png","agent-inbox.png","env-demo.png"];
-$("thumbs").innerHTML=FIX.map(f=>`<img src="/fixtures/${f}" title="${f}" onclick="fromUrl('/fixtures/${f}')">`).join("");
-async function loadPolicy(){ P=await (await fetch("/policy")).json(); $("gate").textContent=P.gate;
-  $("purposes").innerHTML=Object.keys(P.purposes).map(p=>`<button class="${p===purpose?'on':''}" title="${P.purposes[p]}" onclick="setPurpose('${p}')">${p.replace('_',' ')}</button>`).join("");
-  const ps=Object.keys(P.purposes);
-  $("matrix").innerHTML=`<tr><th></th>${ps.map(p=>`<th>${p.replace('_',' ')}</th>`).join("")}</tr>`+Object.keys(P.categories).map(c=>`<tr><td title="${P.categories[c]}">${c.replace('_',' ')}</td>${ps.map(p=>{const v=P.rules[c]?.[p]; const lock=P.locked.includes(c);
-    return `<td><button class="${v?'yes':'no'}" ${lock?'disabled':''} onclick="toggle('${c}','${p}',${!v})">${lock?'🔒':(v?'yes':'no')}</button></td>`}).join("")}</tr>`).join(""); }
+const pretty=s=>s.replace(/_/g,' '); const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]);
+const LABEL={allow:"send",redact:"blur",ask:"ask"};
+function renderSamples(){ $("samples").innerHTML=FIX.map(f=>`<button class="sample ${f===lastName?'on':''}" onclick="fromUrl('/fixtures/${f}')"><img src="/fixtures/${f}" alt="">${f.replace('.png','').replace(/-/g,' ')}</button>`).join(""); }
+async function loadPolicy(){ P=await (await fetch("/policy")).json(); $("gate").textContent=P.gate; const ps=Object.keys(P.purposes);
+  $("purposes").innerHTML=ps.map(p=>`<button role="tab" aria-selected="${p===purpose}" class="${p===purpose?'on':''}" title="${P.purposes[p]}" onclick="setPurpose('${p}')">${pretty(p)}</button>`).join("");
+  $("matrix").innerHTML=`<tr><th></th>${ps.map(p=>`<th>${pretty(p)}</th>`).join("")}</tr>`+Object.keys(P.categories).map(c=>`<tr><td title="${P.categories[c]}">${pretty(c)}</td>${ps.map(p=>{const v=P.rules[c]?.[p]; const lock=P.locked.includes(c);
+    return `<td><button class="${lock?'lock':(v?'yes':'no')}" ${lock?'disabled':''} onclick="toggle('${c}','${p}',${!v})">${lock?'🔒':(v?'yes':'no')}</button></td>`}).join("")}</tr>`).join(""); }
 window.setPurpose=p=>{ purpose=p; loadPolicy(); if(last) run(last); };
 window.toggle=async(c,p,v)=>{ const f=new FormData(); f.append("category",c); f.append("purpose",p); f.append("allowed",v); await fetch("/policy",{method:"POST",body:f}); await loadPolicy(); if(last) run(last); };
-window.answer=(i,act)=>{ const d=R.decisions[i]; (U[purpose]??={})[d.text]=act; toggle(d.category,purpose,act==='allow'); };
-window.fromUrl=async u=>run(await (await fetch(u)).blob());
-async function run(blob){ if(!blob) return; last=blob; $("orig").src=URL.createObjectURL(blob); $("stats").innerHTML='<span class="muted">Gate running locally…</span>';
+window.answer=(i,act)=>{ const d=R.decisions[i]; (U[purpose]??={})[d.text]=act; if(!P.locked.includes(d.category)&&P.categories[d.category]) toggle(d.category,purpose,act==='allow'); else run(last); };
+window.fromUrl=async u=>{ lastName=u.split('/').pop(); renderSamples(); run(await (await fetch(u)).blob()); };
+async function run(blob){ if(!blob) return; last=blob; $("orig").src=URL.createObjectURL(blob); $("stats").innerHTML='<span class="note" style="margin:0">Gate running locally…</span>';
   const f=new FormData(); f.append("frame",blob,"frame.png"); f.append("purpose",purpose); f.append("decisions",JSON.stringify(U[purpose]||{}));
-  const t0=performance.now(); const r=await (await fetch("/gate",{method:"POST",body:f})).json(); const ms=Math.round(performance.now()-t0);
+  const t0=performance.now(); const r=await (await fetch("/gate",{method:"POST",body:f})).json(); const ms=Math.round(performance.now()-t0); R=r;
   $("agent").src=r.agent_sees; const c=r.counts, n=r.decisions.length;
-  $("stats").innerHTML=`<span><b>${n}</b> text regions</span><span><b style="color:var(--ok)">${c.allow}</b> sent</span><span><b style="color:var(--no)">${c.redact}</b> blurred</span><span><b style="color:var(--ask)">${c.ask}</b> waiting for you</span><span><b>${ms}</b> ms on this Mac</span><span><b>0</b> bytes sent before the decision</span>`;
-  R=r; $("decisions").innerHTML=r.decisions.map((d,i)=>`<div class="d"><span class="chip ${d.action}">${d.action}</span><span>${d.category.replace('_',' ')}</span><span>${d.confidence.toFixed(2)}</span><span>${esc(d.text).slice(0,90)}<br><span class="why">${d.source}: ${esc(d.reason)}</span>${d.action==='ask'&&!P.locked.includes(d.category)&&P.categories[d.category]?`<span class="asks"><button onclick="answer(${i},'allow')">allow ${d.category.replace('_',' ')}</button><button onclick="answer(${i},'redact')">keep private</button></span>`:''}</span></div>`).join("");
+  $("stats").innerHTML=`<span><b>${n}</b>text regions</span><span class="ok"><b>${c.allow}</b>sent</span><span class="no"><b>${c.redact}</b>blurred</span><span class="ask"><b>${c.ask}</b>waiting for you</span><span><b>${ms}</b>ms on this Mac</span><span><b>0</b>bytes sent before the decision</span>`;
+  const asks=r.decisions.map((d,i)=>[d,i]).filter(([d])=>d.action==='ask');
+  $("queue").hidden=asks.length===0; $("qn").textContent=`${asks.length} line${asks.length===1?'':'s'}`;
+  $("qlist").innerHTML=asks.map(([d,i])=>`<div class="q" data-i="${i}"><div><div>${esc(d.text).slice(0,110)}</div><div class="meta">model guess: ${pretty(d.category)} at ${d.confidence.toFixed(2)}</div></div>
+    <div class="act"><button class="yes" onclick="answer(${i},'allow')">Send it as ${pretty(d.category)}</button><button class="keep" onclick="answer(${i},'redact')">Keep private</button></div></div>`).join("");
+  $("decisions").className=""; $("decisions").innerHTML=r.decisions.map((d,i)=>`<div class="d ${d.source}" data-i="${i}"><span class="chip ${d.action}">${LABEL[d.action]}</span><span class="cat">${pretty(d.category)}</span>
+    <span class="conf ${d.confidence<P.gate?'low':''}">${d.confidence.toFixed(2)}<i><b style="width:${Math.round(d.confidence*100)}%"></b></i></span>
+    <span style="min-width:0">${esc(d.text).slice(0,110)}<br><span class="why">${d.source}: ${esc(d.reason)}</span></span></div>`).join("");
+  document.querySelectorAll("[data-i]").forEach(el=>{ el.onmouseenter=()=>hl(r.decisions[+el.dataset.i]); el.onmouseleave=()=>hl(null); });
   loadLedger(); }
-function esc(s){ return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]); }
+function hl(d){ const im=$("orig"), W=im.naturalWidth, H=im.naturalHeight; if(W) $("dims").textContent=`${W} × ${H}`;
+  for(const id of ["hl0","hl1"]){ const el=$(id); if(!d||!W){ el.classList.remove("on"); continue; } const [x,y,w,h]=d.box;
+    Object.assign(el.style,{left:`${(x-4)/W*100}%`,top:`${(y-4)/H*100}%`,width:`${(w+8)/W*100}%`,height:`${(h+8)/H*100}%`}); el.classList.add("on"); } }
 async function loadLedger(){ const rows=await (await fetch("/ledger")).json();
-  $("ledger").innerHTML=rows.slice(0,12).map(e=>`<div>${e.ts.slice(11,19)} · frame ${e.frame} · purpose=${e.purpose} · sent ${e.counts.allow} · blurred ${e.counts.redact} · asked ${e.counts.ask} · ${e.ms} ms · ${[...new Set(e.decisions.filter(d=>d.action!=='allow').map(d=>d.category))].join(', ')||'nothing sensitive'}</div>`).join("")||'<div>empty</div>'; }
-window.share=async()=>{ try{ stream=await navigator.mediaDevices.getDisplayMedia({video:true}); $("v").srcObject=stream; $("grabBtn").disabled=false; setTimeout(grab,700); }catch(e){ alert(e.message); } };
+  $("ledger").innerHTML=rows.slice(0,12).map(e=>{ const u=e.decisions.some(d=>d.source==='user');
+    return `<div>${e.ts.slice(11,19)} <span class="${u?'u':''}">${u?'you+gate':'gate'}</span> · ${e.frame.slice(0,8)} · ${pretty(e.purpose)} · sent ${e.counts.allow} · blur ${e.counts.redact} · ask ${e.counts.ask} · ${e.ms} ms · ${[...new Set(e.decisions.filter(d=>d.action!=='allow').map(d=>pretty(d.category)))].join(', ')||'nothing sensitive'}</div>`}).join("")||'<div>empty</div>'; }
+window.share=async()=>{ try{ stream=await navigator.mediaDevices.getDisplayMedia({video:true}); $("v").srcObject=stream; $("grabBtn").disabled=false; lastName=""; renderSamples(); setTimeout(grab,700); }catch(e){ alert(e.message); } };
 window.grab=()=>{ const v=$("v"), c=document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext("2d").drawImage(v,0,0); c.toBlob(run,"image/png"); };
 let S=0; const slides=()=>[...document.querySelectorAll(".slide")];
 window.pitch=i=>{ S=i; $("pitch").classList.add("on"); show(); };
 function show(){ slides().forEach((x,k)=>x.classList.toggle("on",k===S)); $("dots").innerHTML=slides().map((_,k)=>`<i class="${k===S?'on':''}"></i>`).join(""); }
 window.next=()=>{ if(S<slides().length-1){S++;show();} else $("pitch").classList.remove("on"); };
 document.addEventListener("keydown",e=>{ if(!$("pitch").classList.contains("on")) return; if(e.key==="Escape") $("pitch").classList.remove("on"); if(e.key==="ArrowRight"||e.key===" ") {e.preventDefault(); next();} if(e.key==="ArrowLeft"&&S>0){S--;show();} });
-loadPolicy(); loadLedger();
+renderSamples(); loadPolicy(); loadLedger();
 </script>
 </body>
 </html>
