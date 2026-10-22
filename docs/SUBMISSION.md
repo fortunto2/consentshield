@@ -2,6 +2,7 @@
 
 **Project:** ConsentShield
 **Repo:** https://github.com/fortunto2/consentshield
+**Demo (always up, recorded gate results):** https://fortunto2.github.io/consentshield/
 **Screenshot:** docs/demo.png
 **Team:** Rustam Salavatov (fortunto2)
 

@@ -2,6 +2,9 @@
 
 **Your agent watches your screen. Your consent decides what leaves it.**
 
+**Demo:** [fortunto2.github.io/consentshield](https://fortunto2.github.io/consentshield/) (recorded results from the
+real gate, consent matrix live in the page) · the live gate runs on your Mac, see Run below.
+
 ![ConsentShield: your screen on the left, what the cloud agent receives on the right](docs/demo.png)
 
 Personal agents now see the screen: computer-use agents, "remember everything" assistants, Claude
