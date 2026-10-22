@@ -13,3 +13,7 @@ Commands: `make run`, `make demo`, `make test`. Python 3.12 (torch 2.7 has no 3.
 
 Don't: store frame text in the ledger; let a toggle release credentials; send anything before the decision.
 Fixtures are synthetic; never add real personal screenshots.
+
+## Next session
+Start with `docs/CONTEXT.md` and `docs/ROADMAP.md`. Deadline today 17:00 PT. The web demo may already be running on :8790
+(`lsof -i :8790`). Skill: `.claude/skills/dev/SKILL.md`.
