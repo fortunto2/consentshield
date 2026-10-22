@@ -41,6 +41,23 @@ track *Personal agents and data privacy*.
 - **Fail closed.** An "ask" stays blurred until you answer. Your answer decides that line and becomes
   policy for the purpose; the ledger records it as a human decision.
 
+## Models, all local
+- **OCR: Apple Vision** through `visionscan`, a small Swift helper. It runs on the Mac's own hardware and returns text lines with boxes.
+- **Decisions: Laya multilingual** (convaiinnovations, Apache 2.0). It is an open reproduction of TypeSafe's Jev: mmBERT-base, 322M parameters, about 650 MB. It does not generate text. Each typed question gets one forward pass that returns a probability distribution and a confidence, about 30 ms per line on MPS here.
+- **Measured before this hackathon** on an M5: 10 of 12 on our EN+RU smoke set (both misses in Russian). ONNX int8 brings it to 325 MB, Core ML fp16 runs at 13.7 ms per question on the GPU, and the Neural Engine refuses it. Hosted Jev takes 70–500 ms per call, so local is 5–35x faster, and no frame has to leave the machine to be judged.
+- **No LLM anywhere in the gate.** An LLM can be the agent behind the gate. It never decides what the agent is allowed to see.
+
+## Built before vs. today
+**Before:**
+- [ScreenShield](https://github.com/fortunto2/screenshield) (9 Oct): DLP for video, a Rust binary that blurs secrets in a live stream with a 1 s delay. We reuse its OCR helper and secret, PII and injection detectors.
+- The Laya port to ONNX and Core ML, with measurements.
+- BroCheck (yesterday): Jev on images in one call.
+
+**Today:**
+- The consent layer: categories × purposes, a policy with locked credentials, the gate (detectors → model → policy, fail closed), and the money detector.
+- The ledger, plus a web demo with screen sharing, purpose switching and one-click answers that become policy.
+- Synthetic personal screens, the CLI and tests, and the measurement that showed context makes the model worse.
+
 ## Run (macOS, Apple silicon)
 
 ```bash
