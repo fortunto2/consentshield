@@ -30,6 +30,8 @@ and nothing leaves the device before the decision.
 - CLI `make demo`, tests `make test` (3 pass, no model needed).
 - Numbers on fixtures in README.
 
+- Pitch: button 🎤 Pitch in the page header, 5 slides, arrows/click, QR to the repo on the last slide.
+
 ## Known weak spots
 - Laya is unsure on short chat lines (0.2–0.4) → many "ask". Frame it as the feature (fail closed + human in loop).
 - First frame is slow (~1.4 s, warm-up); later frames 0.15–0.4 s.

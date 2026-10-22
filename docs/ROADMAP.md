@@ -2,8 +2,8 @@
 
 ## Before 17:00 today (in order, stop when time is up)
 - [ ] Rehearse the demo path from docs/CONTEXT.md; reset `data/` before going on stage (`rm -rf data`).
-- [ ] Pitch tab or 4-slide deck inside the page (problem · live demo · how · business), big QR to the repo.
-- [ ] Context window: classify each line with its neighbours (prev + next line) to cut the "ask" rate on chats.
+- [x] Pitch deck inside the page (🎤 Pitch), 5 slides, QR to the repo.
+- [x] Context window tried (GATE_CONTEXT=1): worse on fixtures, biopsy line went to ask and an address to allow. Off by default.
 - [ ] "Per-agent" purposes: show two agents (assistant vs analytics SDK) getting different frames side by side.
 - [ ] Optional: Jev (TypeSafe API) as a second judge for comparison, clearly labelled as cloud.
 - [ ] Submit: repo link + 1-paragraph description + screenshot.

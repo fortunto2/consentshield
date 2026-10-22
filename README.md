@@ -2,6 +2,8 @@
 
 **Your agent watches your screen. Your consent decides what leaves it.**
 
+![ConsentShield: your screen on the left, what the cloud agent receives on the right](docs/demo.png)
+
 Personal agents now see the screen: computer-use agents, "remember everything" assistants, Claude
 through MCP. Every screenshot they send to the cloud carries whatever was open: a chat about a
 biopsy, a bank balance, an `.env` file. Consent today is a cookie banner on a website. Nothing asks

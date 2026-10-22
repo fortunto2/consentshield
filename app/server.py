@@ -27,6 +27,11 @@ def index():
     return FileResponse(ROOT / "app" / "index.html")
 
 
+@app.get("/qr.png")
+def qr():
+    return FileResponse(ROOT / "app" / "qr.png")
+
+
 @app.get("/fixtures/{name}")
 def fixture(name: str):
     return FileResponse(ROOT / "fixtures" / Path(name).name)

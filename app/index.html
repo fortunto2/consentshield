@@ -30,12 +30,19 @@
   .grid2 { display:grid; grid-template-columns:3fr 2fr; gap:14px } @media (max-width:860px){ .grid2{ grid-template-columns:1fr } }
   .ledger div { font:12px/1.5 ui-monospace, Menlo, monospace; color:var(--muted); border-top:1px solid var(--line); padding:5px 0 }
   .muted { color:var(--muted) } footer { max-width:1240px; margin:18px auto 0; color:var(--muted); font-size:13px }
+  .pitch { position:fixed; inset:0; background:radial-gradient(1200px 700px at 30% 0%, #12324a, #07090d 70%); z-index:20; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; cursor:pointer }
+  .pitch.on { display:flex } .slide { display:none; max-width:1050px } .slide.on { display:block }
+  .slide h2 { font-size:clamp(34px,5.4vw,68px); margin:0 0 22px; letter-spacing:-.03em; line-height:1.05 } .slide h2 em { color:var(--accent); font-style:normal }
+  .slide p, .slide li { font-size:clamp(18px,2.2vw,27px); color:#cfd6e2; line-height:1.45 } .slide ul { text-align:left; display:inline-block; margin:0 }
+  .flow { font:clamp(14px,1.6vw,20px)/1.9 ui-monospace,Menlo,monospace; color:#cfd6e2; text-align:left; display:inline-block; background:#0f141d; border:1px solid var(--line); border-radius:14px; padding:18px 26px }
+  .dots { position:fixed; bottom:22px; display:flex; gap:8px } .dots i { width:9px; height:9px; border-radius:50%; background:#334 } .dots i.on { background:var(--accent) }
+  .x { position:fixed; top:16px; right:22px; color:var(--muted); font-size:14px }
 </style>
 <body>
 <header>
   <div><h1>🛡️ Consent<span>Shield</span></h1>
     <p class="tag">Your agent watches your screen. Your consent decides what leaves it, checked locally before every frame.</p></div>
-  <div class="row" id="purposes"></div>
+  <div class="row"><span class="row" id="purposes"></span><button onclick="pitch(0)">🎤 Pitch</button></div>
 </header>
 <main>
   <div class="card row">
@@ -58,6 +65,16 @@
   <div class="card"><h3 style="margin:0 0 6px">Consent ledger <span class="why">(categories and decisions only, the text itself is never stored)</span></h3><div id="ledger" class="ledger"></div></div>
 </main>
 <footer>OCR: Apple Vision on device · decisions: Laya (open reproduction of TypeSafe's Jev), calibrated, local · act alone at confidence ≥ <span id="gate">0.8</span>, otherwise ask you · github.com/fortunto2/consentshield</footer>
+<div class="pitch" id="pitch" onclick="next()"><span class="x">← → or click · Esc to close</span>
+<div class="slide"><h2>Your agent watches your screen.<br><em>Who decides what it sends?</em></h2>
+<p>Computer-use agents, recall assistants, Claude over MCP: every screenshot goes to the cloud<br>with whatever was open. A biopsy chat. A bank balance. An <code>.env</code>.</p>
+<p class="muted">Consent today is a cookie banner. Nothing asks at the moment an agent takes your data.</p></div>
+<div class="slide"><h2>Consent<em>Shield</em></h2><p>A consent gate between the screen and the agent, on the device.</p>
+<div class="flow">frame → OCR on device (Apple Vision)<br>&nbsp;&nbsp;→ detectors first: secrets · cards · money · injection<br>&nbsp;&nbsp;→ local decision model (Laya, open Jev): category + confidence<br>&nbsp;&nbsp;→ your consent per purpose: assistant · analytics · training · 3rd party<br>&nbsp;&nbsp;→ ≥ 0.8: act alone &nbsp;·&nbsp; below: blur and ask you<br>&nbsp;&nbsp;→ agent gets the redacted frame · ledger records the decision</div></div>
+<div class="slide"><h2>Live demo</h2><ul><li>Same screen, <em>assistant</em> vs <em>training</em>: different purpose, different frame</li><li>Model unsure → held blurred, one click and it becomes policy</li><li>"Ignore previous instructions…" never reaches the agent</li><li>0 bytes leave before the decision · ledger keeps categories, never text</li></ul></div>
+<div class="slide"><h2>Consent at the moment <em>an agent acts</em></h2><ul><li>SDK / sidecar for agent vendors: one call before every screenshot or tool call</li><li>Consent ledger for GDPR, CCPA and the EU AI Act audits</li><li>Purposes are the language privacy platforms already speak, now enforced per frame</li><li>Next: MCP proxy in front of computer-use tools, Core ML model at 14 ms</li></ul></div>
+<div class="slide"><h2>Rustam Salavatov</h2><p>AI engineer · ScreenShield (3rd place, Cyberdefense Hackathon SF, 9 Oct)</p><img src="/qr.png" alt="" style="width:220px;border-radius:14px;margin-top:10px;background:#fff;padding:10px"><p class="muted">github.com/fortunto2/consentshield</p></div>
+<div class="dots" id="dots"></div></div>
 <video id="v" autoplay muted playsinline hidden></video>
 <script>
 const $=id=>document.getElementById(id); let P={}, purpose="assistant", last=null, stream=null;
@@ -83,6 +100,11 @@ async function loadLedger(){ const rows=await (await fetch("/ledger")).json();
   $("ledger").innerHTML=rows.slice(0,12).map(e=>`<div>${e.ts.slice(11,19)} · frame ${e.frame} · purpose=${e.purpose} · sent ${e.counts.allow} · blurred ${e.counts.redact} · asked ${e.counts.ask} · ${e.ms} ms · ${[...new Set(e.decisions.filter(d=>d.action!=='allow').map(d=>d.category))].join(', ')||'nothing sensitive'}</div>`).join("")||'<div>empty</div>'; }
 window.share=async()=>{ try{ stream=await navigator.mediaDevices.getDisplayMedia({video:true}); $("v").srcObject=stream; $("grabBtn").disabled=false; setTimeout(grab,700); }catch(e){ alert(e.message); } };
 window.grab=()=>{ const v=$("v"), c=document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext("2d").drawImage(v,0,0); c.toBlob(run,"image/png"); };
+let S=0; const slides=()=>[...document.querySelectorAll(".slide")];
+window.pitch=i=>{ S=i; $("pitch").classList.add("on"); show(); };
+function show(){ slides().forEach((x,k)=>x.classList.toggle("on",k===S)); $("dots").innerHTML=slides().map((_,k)=>`<i class="${k===S?'on':''}"></i>`).join(""); }
+window.next=()=>{ if(S<slides().length-1){S++;show();} else $("pitch").classList.remove("on"); };
+document.addEventListener("keydown",e=>{ if(!$("pitch").classList.contains("on")) return; if(e.key==="Escape") $("pitch").classList.remove("on"); if(e.key==="ArrowRight"||e.key===" ") {e.preventDefault(); next();} if(e.key==="ArrowLeft"&&S>0){S--;show();} });
 loadPolicy(); loadLedger();
 </script>
 </body>

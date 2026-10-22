@@ -26,7 +26,8 @@ class Judge:
                                device=device or os.environ.get("LAYA_DEVICE", "mps"))
         self.agent.system_one("warm up", {"c": QUESTION})
 
-    def classify(self, text: str) -> tuple[str, float, float]:
+    def classify(self, text: str, context: str = "") -> tuple[str, float, float]:
         t = time.perf_counter()
-        a = self.agent.system_one(text, {"c": QUESTION})["answers"]["c"]
+        state = f"Screen title and nearby lines: {context}\nLine to classify: {text}" if context else text
+        a = self.agent.system_one(state, {"c": QUESTION})["answers"]["c"]
         return a["choice"], float(a["confidence"]), (time.perf_counter() - t) * 1000

@@ -10,6 +10,7 @@ Order matters and is deliberate:
 from __future__ import annotations
 
 import io
+import os
 import re
 import json
 import subprocess
@@ -25,6 +26,7 @@ from .policy import Policy
 from .schemas import GATE, Decision, GateResult, Region
 
 MONEY = re.compile(r"[$€£]\s?\d[\d,]*(\.\d{2})?")  # an amount on screen is about someone's money, whatever the model says
+CONTEXT = os.environ.get("GATE_CONTEXT", "0") == "1"  # measured worse on fixtures 22.10 (biopsy line -> ask, address -> allow); judge a line together with the screen title and its neighbours
 RULE_CATEGORY = {"email": "contact_info", "phone": "contact_info", "us-ssn": "contact_info",
                  "credit-card": "financial"}
 
@@ -43,7 +45,7 @@ def ocr(image: bytes) -> list[Region]:
 def decide(regions: list[Region], purpose: str, policy: Policy, judge) -> GateResult:
     t0 = time.perf_counter()
     res = GateResult(purpose)
-    for r in regions:
+    for i, r in enumerate(regions):
         hits = detect_leaks(r.text) + detect_injection(r.text)
         if hits:
             h = max(hits, key=lambda f: f.severity == "critical")
@@ -58,7 +60,8 @@ def decide(regions: list[Region], purpose: str, policy: Policy, judge) -> GateRe
         if len(r.text.strip()) < 3:
             res.decisions.append(Decision(r.text, r.box, "public", 1.0, "allow", "too short to mean anything", "detector"))
             continue
-        cat, conf, ms = judge.classify(r.text)
+        near = [regions[0].text] + [x.text for x in regions[max(1, i - 1):i + 2] if x is not r]
+        cat, conf, ms = judge.classify(r.text, " | ".join(dict.fromkeys(near)) if CONTEXT else "")
         allowed = policy.allows(cat, purpose)
         if conf < GATE:
             action, why = "ask", f"model unsure ({conf:.2f} < {GATE}), held until you decide"
