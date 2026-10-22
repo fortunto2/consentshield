@@ -1,10 +1,9 @@
-.PHONY: help run fixtures demo test lint
+.PHONY: help reset run install-mcp mcp fixtures demo integration test lint
 help: ## list targets
 	@grep -E '^[a-z-]+:.*##' Makefile | sed 's/:.*##/ —/'
-reset: ## before going on stage: stop the server, forget every consent and ledger entry, start clean
-	-lsof -ti :8790 | xargs kill 2>/dev/null; sleep 1
+reset: ## before going on stage: forget every consent and ledger entry; running servers pick it up, reload the page
 	rm -rf data
-	$(MAKE) run
+	@echo "clean. The server on :8790 (if running) re-reads policy on the next request; reload the browser tab."
 run: ## web demo on :8790
 	uv run uvicorn app.server:app --host 0.0.0.0 --port 8790
 install-mcp: ## register the MCP server in Claude Code for every directory (user scope)

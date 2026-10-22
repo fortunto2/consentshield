@@ -25,9 +25,20 @@ class Judge:
         self.agent = laya.load("convaiinnovations/laya", subfolder="multilingual",
                                device=device or os.environ.get("LAYA_DEVICE", "mps"))
         self.agent.system_one("warm up", {"c": QUESTION})
+        self._seen: dict[tuple[str, str], tuple[str, float]] = {}
 
     def classify(self, text: str, context: str = "") -> tuple[str, float, float]:
+        """(category, confidence, ms). Deterministic for a given text, so re-gating the same frame under
+        another purpose or after a user answer costs nothing."""
         t = time.perf_counter()
-        state = f"Screen title and nearby lines: {context}\nLine to classify: {text}" if context else text
-        a = self.agent.system_one(state, {"c": QUESTION})["answers"]["c"]
-        return a["choice"], float(a["confidence"]), (time.perf_counter() - t) * 1000
+        choice, conf = self._ask(text, context)
+        return choice, conf, (time.perf_counter() - t) * 1000
+
+    def _ask(self, text: str, context: str) -> tuple[str, float]:
+        if (key := (text, context)) not in self._seen:
+            state = f"Screen title and nearby lines: {context}\nLine to classify: {text}" if context else text
+            a = self.agent.system_one(state, {"c": QUESTION})["answers"]["c"]
+            self._seen[key] = (a["choice"], float(a["confidence"]))
+            if len(self._seen) > 4096:
+                self._seen.pop(next(iter(self._seen)))
+        return self._seen[key]

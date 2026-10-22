@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ConsentShield</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🛡️</text></svg>">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" media="print" onload="this.media='all'">
 <style>
   :root { --bg:#0c0f14; --panel:#141924; --panel-2:#1b2130; --line:#28303f; --fg:#e9edf3; --muted:#8d97a8; --faint:#5e6878;
     --accent:#6fc3ff; --accent-ink:#06121c; --ok:#3ad598; --ok-bg:#0f3327; --no:#ff6b6b; --no-bg:#3a1618; --ask:#f5b73d; --ask-bg:#3a2d0e; --screen:#f6f7f9;
@@ -52,7 +52,7 @@
   th { color:var(--muted); font-weight:500; font-size:12px; border:0 } th:first-child, td:first-child { text-align:left }
   td button { padding:2px 0; min-width:44px; font-size:12px; border-radius:7px } td button.yes { background:var(--ok-bg); color:var(--ok); border-color:transparent } td button.no { background:var(--no-bg); color:var(--no); border-color:transparent }
   td button.lock { background:transparent; color:var(--faint); border-color:transparent; cursor:not-allowed }
-  .note { color:var(--muted); font-size:12px; margin:8px 0 0 }
+  .note { color:var(--muted); font-size:12px; margin:0 } p.note { margin:8px 0 0 }
   .ledger { font:12px/1.55 var(--mono); color:var(--muted) } .ledger div { border-top:1px solid var(--line); padding:5px 0 } .ledger .u { color:var(--accent) }
   footer { color:var(--muted); font-size:13px; max-width:1280px; margin:6px auto 0 }
   .pitch { position:fixed; inset:0; background:radial-gradient(1200px 700px at 30% 0%, #12324a, #07090d 70%); z-index:20; display:none; flex-direction:column; align-items:center; justify-content:center; padding:40px; text-align:center; cursor:pointer }
@@ -74,21 +74,21 @@
   <button class="primary" onclick="share()">🖥️ Share my screen</button>
   <button onclick="grab()" id="grabBtn" disabled>📸 Send frame to agent</button>
   <label class="btn">🖼️ Upload<input type="file" accept="image/*" hidden onchange="run(this.files[0])"></label>
-  <span class="note" style="margin:0 4px 0 6px">Samples (all synthetic):</span>
+  <span class="note" style="margin-left:6px">Samples (all synthetic):</span>
   <span class="samples" id="samples"></span>
 </div>
 <div class="panes">
-  <div class="card"><div class="pane-h"><h3>Your screen · never leaves this Mac</h3><span class="note" style="margin:0" id="dims"></span></div>
+  <div class="card"><div class="pane-h"><h3>Your screen · never leaves this Mac</h3><span class="note" id="dims"></span></div>
     <div class="frame"><img id="orig" alt=""><div class="hl" id="hl0"></div></div></div>
   <div class="card"><div class="pane-h"><h3>What the agent receives</h3><div class="tabs" id="purposes" role="tablist" aria-label="Agent purpose"></div></div>
     <div class="frame"><img id="agent" alt=""><div class="hl" id="hl1"></div></div>
-    <div class="stats" id="stats"><span class="note" style="margin:0">Pick a screen to run the gate.</span></div></div>
+    <div class="stats" id="stats"><span class="note">Pick a screen to run the gate.</span></div></div>
 </div>
 <div class="grid2">
   <div class="col">
     <div class="card queue" id="queue" hidden>
       <h3 class="t">Waiting for you <small id="qn"></small></h3>
-      <p class="note" style="margin:0 0 4px">The model was not sure what these lines are. They stay blurred until you answer. Your answer decides the line and becomes policy for this purpose.</p>
+      <p class="note" style="margin-top:0">The model was not sure what these lines are. They stay blurred until you answer. Your answer decides the line and becomes policy for this purpose.</p>
       <div id="qlist"></div></div>
     <div class="card"><h3 class="t">Every line, every decision <small>hover a row to find it on the screen</small></h3><div id="decisions" class="note">—</div></div>
   </div>
@@ -112,11 +112,13 @@
 <div class="dots" id="dots"></div></div>
 <video id="v" autoplay muted playsinline hidden></video>
 <script>
-const $=id=>document.getElementById(id); let P={}, purpose="assistant", last=null, lastName="", stream=null, U={}, R=null; // U[purpose][line text] = what you answered
+const $=id=>document.getElementById(id); let P={}, purpose="assistant", last=null, stream=null, U={}, R=null; // U[purpose][line text] = what you answered
 const FIX=["chat-personal.png","bank-dashboard.png","agent-inbox.png","env-demo.png"];
 const pretty=s=>s.replace(/_/g,' '); const esc=s=>s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"})[c]);
 const LABEL={allow:"send",redact:"blur",ask:"ask"};
-function renderSamples(){ $("samples").innerHTML=FIX.map(f=>`<button class="sample ${f===lastName?'on':''}" onclick="fromUrl('/fixtures/${f}')"><img src="/fixtures/${f}" alt="">${f.replace('.png','').replace(/-/g,' ')}</button>`).join(""); }
+$("samples").innerHTML=FIX.map(f=>`<button class="sample" data-f="${f}" onclick="fromUrl('/fixtures/${f}')"><img src="/fixtures/${f}" alt="">${f.replace('.png','').replace(/-/g,' ')}</button>`).join("");
+const markSample=name=>document.querySelectorAll(".sample").forEach(b=>b.classList.toggle("on",b.dataset.f===name));
+$("orig").onload=()=>{ const im=$("orig"); $("dims").textContent=`${im.naturalWidth} × ${im.naturalHeight}`; };
 async function loadPolicy(){ P=await (await fetch("/policy")).json(); $("gate").textContent=P.gate; const ps=Object.keys(P.purposes);
   $("purposes").innerHTML=ps.map(p=>`<button role="tab" aria-selected="${p===purpose}" class="${p===purpose?'on':''}" title="${P.purposes[p]}" onclick="setPurpose('${p}')">${pretty(p)}</button>`).join("");
   $("matrix").innerHTML=`<tr><th></th>${ps.map(p=>`<th>${pretty(p)}</th>`).join("")}</tr>`+Object.keys(P.categories).map(c=>`<tr><td title="${P.categories[c]}">${pretty(c)}</td>${ps.map(p=>{const v=P.rules[c]?.[p]; const lock=P.locked.includes(c);
@@ -124,8 +126,8 @@ async function loadPolicy(){ P=await (await fetch("/policy")).json(); $("gate").
 window.setPurpose=p=>{ purpose=p; loadPolicy(); if(last) run(last); };
 window.toggle=async(c,p,v)=>{ const f=new FormData(); f.append("category",c); f.append("purpose",p); f.append("allowed",v); await fetch("/policy",{method:"POST",body:f}); await loadPolicy(); if(last) run(last); };
 window.answer=(i,act)=>{ const d=R.decisions[i]; (U[purpose]??={})[d.text]=act; if(!P.locked.includes(d.category)&&P.categories[d.category]) toggle(d.category,purpose,act==='allow'); else run(last); };
-window.fromUrl=async u=>{ lastName=u.split('/').pop(); renderSamples(); run(await (await fetch(u)).blob()); };
-async function run(blob){ if(!blob) return; last=blob; $("orig").src=URL.createObjectURL(blob); $("stats").innerHTML='<span class="note" style="margin:0">Gate running locally…</span>';
+window.fromUrl=async u=>{ markSample(u.split('/').pop()); run(await (await fetch(u)).blob()); };
+async function run(blob){ if(!blob) return; last=blob; $("orig").src=URL.createObjectURL(blob); $("stats").innerHTML='<span class="note">Gate running locally…</span>';
   const f=new FormData(); f.append("frame",blob,"frame.png"); f.append("purpose",purpose); f.append("decisions",JSON.stringify(U[purpose]||{}));
   const t0=performance.now(); const r=await (await fetch("/gate",{method:"POST",body:f})).json(); const ms=Math.round(performance.now()-t0); R=r;
   $("agent").src=r.agent_sees; const c=r.counts, n=r.decisions.length;
@@ -139,20 +141,20 @@ async function run(blob){ if(!blob) return; last=blob; $("orig").src=URL.createO
     <span style="min-width:0">${esc(d.text).slice(0,110)}<br><span class="why">${d.source}: ${esc(d.reason)}</span></span></div>`).join("");
   document.querySelectorAll("[data-i]").forEach(el=>{ el.onmouseenter=()=>hl(r.decisions[+el.dataset.i]); el.onmouseleave=()=>hl(null); });
   loadLedger(); }
-function hl(d){ const im=$("orig"), W=im.naturalWidth, H=im.naturalHeight; if(W) $("dims").textContent=`${W} × ${H}`;
+function hl(d){ const im=$("orig"), W=im.naturalWidth, H=im.naturalHeight;
   for(const id of ["hl0","hl1"]){ const el=$(id); if(!d||!W){ el.classList.remove("on"); continue; } const [x,y,w,h]=d.box;
     Object.assign(el.style,{left:`${(x-4)/W*100}%`,top:`${(y-4)/H*100}%`,width:`${(w+8)/W*100}%`,height:`${(h+8)/H*100}%`}); el.classList.add("on"); } }
 async function loadLedger(){ const rows=await (await fetch("/ledger")).json();
   $("ledger").innerHTML=rows.slice(0,12).map(e=>{ const u=e.decisions.some(d=>d.source==='user');
     return `<div>${e.ts.slice(11,19)} <span class="${u?'u':''}">${u?'you+gate':'gate'}</span> · ${e.frame.slice(0,8)} · ${pretty(e.purpose)} · sent ${e.counts.allow} · blur ${e.counts.redact} · ask ${e.counts.ask} · ${e.ms} ms · ${[...new Set(e.decisions.filter(d=>d.action!=='allow').map(d=>pretty(d.category)))].join(', ')||'nothing sensitive'}</div>`}).join("")||'<div>empty</div>'; }
-window.share=async()=>{ try{ stream=await navigator.mediaDevices.getDisplayMedia({video:true}); $("v").srcObject=stream; $("grabBtn").disabled=false; lastName=""; renderSamples(); setTimeout(grab,700); }catch(e){ alert(e.message); } };
+window.share=async()=>{ try{ stream=await navigator.mediaDevices.getDisplayMedia({video:true}); $("v").srcObject=stream; $("grabBtn").disabled=false; markSample(""); setTimeout(grab,700); }catch(e){ alert(e.message); } };
 window.grab=()=>{ const v=$("v"), c=document.createElement("canvas"); c.width=v.videoWidth; c.height=v.videoHeight; c.getContext("2d").drawImage(v,0,0); c.toBlob(run,"image/png"); };
 let S=0; const slides=()=>[...document.querySelectorAll(".slide")];
 window.pitch=i=>{ S=i; $("pitch").classList.add("on"); show(); };
 function show(){ slides().forEach((x,k)=>x.classList.toggle("on",k===S)); $("dots").innerHTML=slides().map((_,k)=>`<i class="${k===S?'on':''}"></i>`).join(""); }
 window.next=()=>{ if(S<slides().length-1){S++;show();} else $("pitch").classList.remove("on"); };
 document.addEventListener("keydown",e=>{ if(!$("pitch").classList.contains("on")) return; if(e.key==="Escape") $("pitch").classList.remove("on"); if(e.key==="ArrowRight"||e.key===" ") {e.preventDefault(); next();} if(e.key==="ArrowLeft"&&S>0){S--;show();} });
-renderSamples(); loadPolicy(); loadLedger();
+loadPolicy(); loadLedger();
 </script>
 </body>
 </html>

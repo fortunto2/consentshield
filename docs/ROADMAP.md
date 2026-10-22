@@ -2,7 +2,7 @@
 
 ## Before 17:00 today (in order, stop when time is up)
 - [x] Rehearsed the demo path in the browser (22.10 14:35): samples, answer an ask, switch purpose, pitch deck.
-- [ ] Before going on stage: `make reset` (the server keeps the policy in memory, `rm -rf data` alone is not enough).
+- [ ] Before going on stage: `make reset` (= `rm -rf data`; servers re-read the policy file, reload the browser tab).
 - [x] Pitch deck inside the page (🎤 Pitch), 5 slides, QR to the repo.
 - [x] Context window tried (GATE_CONTEXT=1): worse on fixtures, biopsy line went to ask and an address to allow. Off by default.
 - [x] A human's answer decides the line (was: policy flipped but the line stayed "ask"). source=user in the ledger.
@@ -15,6 +15,8 @@
 
 ## After the hackathon
 - Live mode: continuous capture with change detection (port ScreenShield's luma-grid diff) instead of single frames.
+- Line-level answers live in the browser tab (`U[purpose][text]`); move them into Policy (hashed text, next to policy.json)
+  so MCP and CLI see them too and they survive a reload. Then offer "this line" vs "all <category> for <purpose>" as two buttons.
 - MCP: add `ask` resolution over MCP elicitation, so the agent itself can route the question to the user.
 - Consent receipts export (JSON, signed) for audits; per-agent identities.
 - Core ML Laya build (13.7 ms/question measured) instead of torch; ship as one macOS binary.
