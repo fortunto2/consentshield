@@ -31,6 +31,10 @@ and nothing leaves the device before the decision.
 - Numbers on fixtures in README.
 
 - Pitch: button 🎤 Pitch in the page header, 5 slides, arrows/click, QR to the repo on the last slide.
+- MCP server (`app/mcp_server.py`, `.mcp.json`): Claude Code inside the repo gets `screenshot(purpose)` and receives
+  only the gated frame; transcript of a real run in docs/mcp-transcript.md. Answers in the web UI apply to the agent's next frame.
+- Console redesigned 14:35: asks queue on top, purpose tabs on the agent pane, hover a row → box on both screens.
+- Before stage: `make reset` (kills :8790, deletes data/, starts clean). Submission paragraph: docs/SUBMISSION.md.
 
 ## Known weak spots
 - Laya is unsure on short chat lines (0.2–0.4) → many "ask". Frame it as the feature (fail closed + human in loop).
