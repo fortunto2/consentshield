@@ -2,6 +2,8 @@
 
 **Your agent watches your screen. Your consent decides what leaves it.**
 
+**Write-up:** [rustman.org](https://rustman.org/posts/superset-hackathon-consentshield-2026/) (how it was built in a day, and what does not hold yet)
+
 **Demo:** [fortunto2.github.io/consentshield](https://fortunto2.github.io/consentshield/) (recorded results from the
 real gate, consent matrix live in the page) · the live gate runs on your Mac, see Run below.
 
